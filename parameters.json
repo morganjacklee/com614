@@ -1,0 +1,81 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "extensions_enablevmaccess_username": {
+            "value": null
+        },
+        "extensions_enablevmaccess_password": {
+            "value": null
+        },
+        "extensions_enablevmaccess_ssh_key": {
+            "value": null
+        },
+        "extensions_enablevmaccess_reset_ssh": {
+            "value": null
+        },
+        "extensions_enablevmaccess_remove_user": {
+            "value": null
+        },
+        "extensions_enablevmaccess_expiration": {
+            "value": null
+        },
+        "extensions_setup_controller_storageAccountName": {
+            "value": null
+        },
+        "extensions_setup_controller_storageAccountKey": {
+            "value": null
+        },
+        "extensions_setup_controller_commandToExecute": {
+            "value": null
+        },
+        "servers_mysql_ifok7c_name": {
+            "value": null
+        },
+        "loadBalancers_lb_ifok7c_name": {
+            "value": null
+        },
+        "storageAccounts_absifok7c_name": {
+            "value": null
+        },
+        "virtualNetworks_vnet_ifok7c_name": {
+            "value": null
+        },
+        "containerGroups_demo_name": {
+            "value": null
+        },
+        "autoscalesettings_autoscalewad_name": {
+            "value": null
+        },
+        "publicIPAddresses_lb_pubip_ifok7c_name": {
+            "value": null
+        },
+        "storageAccounts_vmssktd4ntenrrtg6_name": {
+            "value": null
+        },
+        "virtualMachineScaleSets_vmss_ifok7c_name": {
+            "value": null
+        },
+        "publicIPAddresses_vnet_gw_ip_ifok7c_name": {
+            "value": null
+        },
+        "virtualMachines_controller_vm_ifok7c_name": {
+            "value": null
+        },
+        "publicIPAddresses_controller_pubip_ifok7c_name": {
+            "value": null
+        },
+        "networkInterfaces_controller_vm_nic_ifok7c_name": {
+            "value": null
+        },
+        "virtualNetworkGateways_vnet_gateway_ifok7c_name": {
+            "value": null
+        },
+        "networkSecurityGroups_controller_nsg_ifok7c_name": {
+            "value": null
+        },
+        "disks_vmss_ifok7c_vmss_ifok7c_0_OsDisk_1_6673ca5a816444b69053b585db192fb3_externalid": {
+            "value": null
+        }
+    }
+}

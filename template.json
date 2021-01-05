@@ -1,0 +1,3482 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "extensions_enablevmaccess_username": {
+            "type": "SecureString"
+        },
+        "extensions_enablevmaccess_password": {
+            "type": "SecureString"
+        },
+        "extensions_enablevmaccess_ssh_key": {
+            "type": "SecureString"
+        },
+        "extensions_enablevmaccess_reset_ssh": {
+            "type": "SecureString"
+        },
+        "extensions_enablevmaccess_remove_user": {
+            "type": "SecureString"
+        },
+        "extensions_enablevmaccess_expiration": {
+            "type": "SecureString"
+        },
+        "extensions_setup_controller_storageAccountName": {
+            "type": "SecureString"
+        },
+        "extensions_setup_controller_storageAccountKey": {
+            "type": "SecureString"
+        },
+        "extensions_setup_controller_commandToExecute": {
+            "type": "SecureString"
+        },
+        "servers_mysql_ifok7c_name": {
+            "defaultValue": "mysql-ifok7c",
+            "type": "String"
+        },
+        "loadBalancers_lb_ifok7c_name": {
+            "defaultValue": "lb-ifok7c",
+            "type": "String"
+        },
+        "storageAccounts_absifok7c_name": {
+            "defaultValue": "absifok7c",
+            "type": "String"
+        },
+        "virtualNetworks_vnet_ifok7c_name": {
+            "defaultValue": "vnet-ifok7c",
+            "type": "String"
+        },
+        "containerGroups_demo_name": {
+            "defaultValue": "demo",
+            "type": "String"
+        },
+        "autoscalesettings_autoscalewad_name": {
+            "defaultValue": "autoscalewad",
+            "type": "String"
+        },
+        "publicIPAddresses_lb_pubip_ifok7c_name": {
+            "defaultValue": "lb-pubip-ifok7c",
+            "type": "String"
+        },
+        "storageAccounts_vmssktd4ntenrrtg6_name": {
+            "defaultValue": "vmssktd4ntenrrtg6",
+            "type": "String"
+        },
+        "virtualMachineScaleSets_vmss_ifok7c_name": {
+            "defaultValue": "vmss-ifok7c",
+            "type": "String"
+        },
+        "publicIPAddresses_vnet_gw_ip_ifok7c_name": {
+            "defaultValue": "vnet-gw-ip-ifok7c",
+            "type": "String"
+        },
+        "virtualMachines_controller_vm_ifok7c_name": {
+            "defaultValue": "controller-vm-ifok7c",
+            "type": "String"
+        },
+        "publicIPAddresses_controller_pubip_ifok7c_name": {
+            "defaultValue": "controller-pubip-ifok7c",
+            "type": "String"
+        },
+        "networkInterfaces_controller_vm_nic_ifok7c_name": {
+            "defaultValue": "controller-vm-nic-ifok7c",
+            "type": "String"
+        },
+        "virtualNetworkGateways_vnet_gateway_ifok7c_name": {
+            "defaultValue": "vnet-gateway-ifok7c",
+            "type": "String"
+        },
+        "networkSecurityGroups_controller_nsg_ifok7c_name": {
+            "defaultValue": "controller-nsg-ifok7c",
+            "type": "String"
+        },
+        "disks_vmss_ifok7c_vmss_ifok7c_0_OsDisk_1_6673ca5a816444b69053b585db192fb3_externalid": {
+            "defaultValue": "/subscriptions/be0b3e98-1ce2-4d4e-9728-2012a9c4937b/resourceGroups/cloud-virtualisation-com614/providers/Microsoft.Compute/disks/vmss-ifok7c_vmss-ifok7c_0_OsDisk_1_6673ca5a816444b69053b585db192fb3",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2019-12-01",
+            "name": "[parameters('containerGroups_demo_name')]",
+            "location": "uksouth",
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "[parameters('containerGroups_demo_name')]",
+                        "properties": {
+                            "image": "mcr.microsoft.com/azuredocs/aci-helloworld:latest",
+                            "ports": [
+                                {
+                                    "protocol": "TCP",
+                                    "port": 80
+                                }
+                            ],
+                            "environmentVariables": [],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 1.5,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    }
+                ],
+                "initContainers": [],
+                "restartPolicy": "OnFailure",
+                "ipAddress": {
+                    "ports": [
+                        {
+                            "protocol": "TCP",
+                            "port": 80
+                        }
+                    ],
+                    "ip": "51.143.249.139",
+                    "type": "Public",
+                    "dnsNameLabel": "com614"
+                },
+                "osType": "Linux"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers",
+            "apiVersion": "2017-12-01",
+            "name": "[parameters('servers_mysql_ifok7c_name')]",
+            "location": "uksouth",
+            "sku": {
+                "name": "GP_Gen5_2",
+                "tier": "GeneralPurpose",
+                "family": "Gen5",
+                "capacity": 2
+            },
+            "properties": {
+                "storageProfile": {
+                    "storageMB": 128000,
+                    "backupRetentionDays": 35,
+                    "geoRedundantBackup": "Enabled",
+                    "storageAutogrow": "Disabled"
+                },
+                "version": "5.7",
+                "sslEnforcement": "Disabled",
+                "minimalTlsVersion": "TLSEnforcementDisabled",
+                "infrastructureEncryption": "Disabled",
+                "publicNetworkAccess": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('networkSecurityGroups_controller_nsg_ifok7c_name')]",
+            "location": "uksouth",
+            "tags": {
+                "displayName": "Controller NSG"
+            },
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "Allow_SSH",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "Allow_http",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1005,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('publicIPAddresses_controller_pubip_ifok7c_name')]",
+            "location": "uksouth",
+            "tags": {
+                "displayName": "Controller VM Public IP"
+            },
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "ipAddress": "52.151.64.88",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('publicIPAddresses_controller_pubip_ifok7c_name')]",
+                    "fqdn": "[concat(parameters('publicIPAddresses_controller_pubip_ifok7c_name'), '.uksouth.cloudapp.azure.com')]"
+                },
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('publicIPAddresses_lb_pubip_ifok7c_name')]",
+            "location": "uksouth",
+            "tags": {
+                "displayName": "Load Balancer Public IP"
+            },
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "ipAddress": "52.151.92.175",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "dnsSettings": {
+                    "domainNameLabel": "lb-ifok7c",
+                    "fqdn": "lb-ifok7c.uksouth.cloudapp.azure.com"
+                },
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('publicIPAddresses_vnet_gw_ip_ifok7c_name')]",
+            "location": "uksouth",
+            "tags": {
+                "displayName": "Virtual network gateway Public IP"
+            },
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "ipAddress": "40.120.39.70",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Dynamic",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('virtualNetworks_vnet_ifok7c_name')]",
+            "location": "uksouth",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "172.31.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "web-subnet-ifok7c",
+                        "properties": {
+                            "addressPrefix": "172.31.0.0/24",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "san-subnet-ifok7c",
+                        "properties": {
+                            "addressPrefix": "172.31.2.0/24",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "redis-subnet-ifok7c",
+                        "properties": {
+                            "addressPrefix": "172.31.3.0/24",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "GatewaySubnet",
+                        "properties": {
+                            "addressPrefix": "172.31.4.0/24",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "appgw-subnet-ifok7c",
+                        "properties": {
+                            "addressPrefix": "172.31.6.0/24",
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false,
+                "enableVmProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[parameters('storageAccounts_absifok7c_name')]",
+            "location": "uksouth",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[parameters('storageAccounts_vmssktd4ntenrrtg6_name')]",
+            "location": "uksouth",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('virtualMachines_controller_vm_ifok7c_name')]",
+            "location": "uksouth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_controller_vm_nic_ifok7c_name'))]"
+            ],
+            "tags": {
+                "displayName": "Controller Virtual Machine"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_DS1_v2"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "16.04-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "[parameters('virtualMachines_controller_vm_ifok7c_name')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS",
+                            "id": "[resourceId('Microsoft.Compute/disks', parameters('virtualMachines_controller_vm_ifok7c_name'))]"
+                        },
+                        "diskSizeGB": 30
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "name": "[concat(parameters('virtualMachines_controller_vm_ifok7c_name'), '_disk2_dd7f0963557b4fb08035b48b43610651')]",
+                            "createOption": "Empty",
+                            "caching": "None",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS",
+                                "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_controller_vm_ifok7c_name'), '_disk2_dd7f0963557b4fb08035b48b43610651'))]"
+                            },
+                            "diskSizeGB": 127,
+                            "toBeDetached": false
+                        },
+                        {
+                            "lun": 1,
+                            "name": "[concat(parameters('virtualMachines_controller_vm_ifok7c_name'), '_disk3_45c38b87fc9b4d6289dbd45f87ea1b16')]",
+                            "createOption": "Empty",
+                            "caching": "None",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS",
+                                "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_controller_vm_ifok7c_name'), '_disk3_45c38b87fc9b4d6289dbd45f87ea1b16'))]"
+                            },
+                            "diskSizeGB": 127,
+                            "toBeDetached": false
+                        },
+                        {
+                            "lun": 2,
+                            "name": "[concat(parameters('virtualMachines_controller_vm_ifok7c_name'), '_disk4_6375a8837ceb4a319a13bf1497d5934d')]",
+                            "createOption": "Empty",
+                            "caching": "None",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS",
+                                "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_controller_vm_ifok7c_name'), '_disk4_6375a8837ceb4a319a13bf1497d5934d'))]"
+                            },
+                            "diskSizeGB": 127,
+                            "toBeDetached": false
+                        },
+                        {
+                            "lun": 3,
+                            "name": "[concat(parameters('virtualMachines_controller_vm_ifok7c_name'), '_disk5_7f7f3b830563455cbcb77c7bac3237fe')]",
+                            "createOption": "Empty",
+                            "caching": "None",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS",
+                                "id": "[resourceId('Microsoft.Compute/disks', concat(parameters('virtualMachines_controller_vm_ifok7c_name'), '_disk5_7f7f3b830563455cbcb77c7bac3237fe'))]"
+                            },
+                            "diskSizeGB": 127,
+                            "toBeDetached": false
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_controller_vm_ifok7c_name')]",
+                    "adminUsername": "azureadmin",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": true,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "/home/azureadmin/.ssh/authorized_keys",
+                                    "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCjkAQEJAdiZOz63Od69NMJPa24JKHkZiBhv1P7xVOtItBoTQY09b8Io9gknYey5QkR8hRpzS8TXADKOigC1LFNCKsIxbx4BCYsGSLykJjLZhC/NFtOXGl2UxEhSc+GzKhmAcbLP3h2VRfGVZI+HMkvuiqVQAJyoUoYRPgSRI8Berlexc34ygTo5M7HHhs9p71vTP62KzFq6k6aA8KyR8QAzyFRg19/ohUPKIOBgz+ptvMaEpvpHVktbpxknO7Ar1I34ap2AZC2nDAme3rUNicBEKBHGLGvVxgvLkKzYdSKlN35wlvDL8FYW/fI7ilHEI/IqpYDqjrhdOyyTXlGWIGz morgan@cc-624286f2-5fc645bc48-c2jsv"
+                                }
+                            ]
+                        },
+                        "provisionVMAgent": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_controller_vm_nic_ifok7c_name'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-07-01",
+            "name": "[concat(parameters('virtualMachines_controller_vm_ifok7c_name'), '/AzureNetworkWatcherExtension')]",
+            "location": "uksouth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_controller_vm_ifok7c_name'))]"
+            ],
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.NetworkWatcher",
+                "type": "NetworkWatcherAgentLinux",
+                "typeHandlerVersion": "1.4"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-07-01",
+            "name": "[concat(parameters('virtualMachines_controller_vm_ifok7c_name'), '/enablevmaccess')]",
+            "location": "uksouth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_controller_vm_ifok7c_name'))]"
+            ],
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.OSTCExtensions",
+                "type": "VMAccessForLinux",
+                "typeHandlerVersion": "1.4",
+                "settings": {},
+                "protectedSettings": {
+                    "username": "[parameters('extensions_enablevmaccess_username')]",
+                    "password": "[parameters('extensions_enablevmaccess_password')]",
+                    "ssh_key": "[parameters('extensions_enablevmaccess_ssh_key')]",
+                    "reset_ssh": "[parameters('extensions_enablevmaccess_reset_ssh')]",
+                    "remove_user": "[parameters('extensions_enablevmaccess_remove_user')]",
+                    "expiration": "[parameters('extensions_enablevmaccess_expiration')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-07-01",
+            "name": "[concat(parameters('virtualMachines_controller_vm_ifok7c_name'), '/setup_controller')]",
+            "location": "uksouth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_controller_vm_ifok7c_name'))]"
+            ],
+            "tags": {
+                "displayName": "setup_controller"
+            },
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/Azure/LAMP/master/scripts/setup_controller.sh",
+                        "https://raw.githubusercontent.com/Azure/LAMP/master/scripts/helper_functions.sh"
+                    ]
+                },
+                "protectedSettings": {
+                    "storageAccountName": "[parameters('extensions_setup_controller_storageAccountName')]",
+                    "storageAccountKey": "[parameters('extensions_setup_controller_storageAccountKey')]",
+                    "commandToExecute": "[parameters('extensions_setup_controller_commandToExecute')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+            "apiVersion": "2019-07-01",
+            "name": "[concat(parameters('virtualMachineScaleSets_vmss_ifok7c_name'), '/setup_lamp')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('virtualMachineScaleSets_vmss_ifok7c_name'))]"
+            ],
+            "properties": {
+                "provisioningState": "Succeeded",
+                "autoUpgradeMinorVersion": true,
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/Azure/LAMP/master/scripts/setup_webserver.sh",
+                        "https://raw.githubusercontent.com/Azure/LAMP/master/scripts/helper_functions.sh"
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/audit_log_enabled')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/audit_log_events')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "CONNECTION",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/audit_log_exclude_users')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "azure_superuser",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/audit_log_include_users')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/binlog_expire_logs_seconds')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/binlog_group_commit_sync_delay')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/binlog_group_commit_sync_no_delay_count')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/binlog_row_image')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "minimal",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/binlog_sum_size_for_stop_pct_max')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "30",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/character_set_server')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "latin1",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/collation_server')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "latin1_swedish_ci",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/connect_timeout')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "10",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/default_week_format')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/div_precision_increment')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "4",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/enforce_gtid_consistency')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/eq_range_index_dive_limit')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "200",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/event_scheduler')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/explicit_defaults_for_timestamp')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/flush_time')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/ft_query_expansion_limit')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "20",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/group_concat_max_len')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1024",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/gtid_mode')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/init_connect')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_adaptive_flushing')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_adaptive_flushing_lwm')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "10",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_adaptive_hash_index')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_adaptive_hash_index_parts')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "8",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_adaptive_max_sleep_delay')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "150000",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_autoextend_increment')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "64",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_autoinc_lock_mode')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_buffer_pool_dump_pct')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "25",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_buffer_pool_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "7516192768",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_change_buffer_max_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "25",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_change_buffering')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "all",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_cmp_per_index_enabled')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_commit_concurrency')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_compression_failure_threshold_pct')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "5",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_compression_level')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "6",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_compression_pad_pct_max')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "50",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_concurrency_tickets')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "5000",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_deadlock_detect')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_default_row_format')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "DYNAMIC",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_file_format')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "Barracuda",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_file_per_table')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_fill_factor')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "100",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_ft_cache_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "8000000",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_ft_enable_stopword')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_ft_max_token_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "84",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_ft_min_token_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "3",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_ft_num_word_optimize')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "2000",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_ft_result_cache_limit')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "2000000000",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_ft_sort_pll_degree')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "2",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_ft_total_cache_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "640000000",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_io_capacity')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "200",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_io_capacity_max')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "2000",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_large_prefix')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_lock_wait_timeout')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "50",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_log_compressed_pages')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_lru_scan_depth')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1024",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_max_dirty_pages_pct')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "75",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_max_dirty_pages_pct_lwm')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_max_purge_lag')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_max_purge_lag_delay')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_old_blocks_pct')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "37",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_old_blocks_time')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1000",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_online_alter_log_max_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "134217728",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_optimize_fulltext_only')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_page_cleaners')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "4",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_purge_batch_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "300",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_purge_rseg_truncate_frequency')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "128",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_purge_threads')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "4",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_random_read_ahead')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_read_ahead_threshold')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "56",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_read_io_threads')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "4",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_rollback_segments')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "128",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_stats_auto_recalc')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_stats_include_delete_marked')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_stats_method')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "nulls_equal",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_stats_on_metadata')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_stats_persistent')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_stats_persistent_sample_pages')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "20",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_stats_transient_sample_pages')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "8",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_sync_array_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_table_locks')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_thread_concurrency')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_thread_sleep_delay')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "10000",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/innodb_write_io_threads')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "4",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/interactive_timeout')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "28800",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/join_buffer_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "262144",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/local_infile')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/lock_wait_timeout')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "31536000",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/log_bin_trust_function_creators')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/log_output')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "FILE",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/log_queries_not_using_indexes')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/log_slow_admin_statements')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/log_slow_slave_statements')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/log_throttle_queries_not_using_indexes')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/long_query_time')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "10",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/lower_case_table_names')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_allowed_packet')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "536870912",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_connect_errors')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "100",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_connections')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "300",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_digest_length')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1024",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_error_count')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "64",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_execution_time')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_heap_table_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "16777216",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_join_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "18446744073709551615",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_length_for_sort_data')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1024",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_points_in_geometry')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "65536",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_prepared_stmt_count')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "16382",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_seeks_for_key')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "4294967295",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_sort_length')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1024",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_sp_recursion_depth')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_user_connections')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/max_write_lock_count')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "4294967295",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/min_examined_row_limit')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/net_buffer_length')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "16384",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/net_read_timeout')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "120",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/net_retry_count')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "10",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/net_write_timeout')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "240",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/ngram_token_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "2",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/optimizer_prune_level')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/optimizer_search_depth')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "62",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/optimizer_switch')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "default",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/parser_max_mem_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "18446744073709551615",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/performance_schema')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/preload_buffer_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "32768",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/query_cache_limit')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1048576",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/query_cache_min_res_unit')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "4096",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/query_cache_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/query_cache_type')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/query_prealloc_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "8192",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/query_store_capture_interval')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "15",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/query_store_capture_mode')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "NONE",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/query_store_capture_utility_queries')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "NO",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/query_store_retention_period_in_days')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "7",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/query_store_wait_sampling_capture_mode')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "NONE",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/query_store_wait_sampling_frequency')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "30",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/range_alloc_block_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "4096",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/range_optimizer_max_mem_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "8388608",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/read_only')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/redirect_enabled')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/relay_log_space_limit')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1073741824",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/replicate_wild_ignore_table')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "mysql.%,information_schema.%,performance_schema.%,sys.%",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/server_id')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "2483657478",
+                "source": "user-override"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/session_track_schema')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "ON",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/session_track_state_change')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/show_compatibility_56')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/skip_show_database')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/slave_net_timeout')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "60",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/slow_query_log')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/sort_buffer_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "524288",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/sql_mode')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/sql_require_primary_key')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "OFF",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/stored_program_cache')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "256",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/table_definition_cache')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "2400",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/table_open_cache')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "2400",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/table_open_cache_instances')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/thread_cache_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "11",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/thread_handling')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "one-thread-per-connection",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/thread_pool_batch_max_time')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/thread_pool_batch_wait_timeout')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "0",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/thread_pool_max_threads')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "65535",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/thread_pool_min_threads')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "1",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/thread_stack')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "262144",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/time_zone')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "SYSTEM",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/tmp_table_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "16777216",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/transaction_alloc_block_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "8192",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/transaction_prealloc_size')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "4096",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/tx_isolation')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "REPEATABLE-READ",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/updatable_views_with_limit')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "YES",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/configurations",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/wait_timeout')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "value": "180",
+                "source": "system-default"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/databases",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/information_schema')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "charset": "utf8",
+                "collation": "utf8_general_ci"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/databases",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/mysql')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "charset": "latin1",
+                "collation": "latin1_swedish_ci"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/databases",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/performance_schema')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "charset": "utf8",
+                "collation": "utf8_general_ci"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/databases",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/sys')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "charset": "utf8",
+                "collation": "utf8_general_ci"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/firewallRules",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/mysql-firewall-allow-ctlr')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "startIpAddress": "52.151.64.88",
+                "endIpAddress": "52.151.64.88"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/firewallRules",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/mysql-firewall-allow-lb')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "startIpAddress": "52.151.92.175",
+                "endIpAddress": "52.151.92.175"
+            }
+        },
+        {
+            "type": "Microsoft.DBforMySQL/servers/securityAlertPolicies",
+            "apiVersion": "2017-12-01",
+            "name": "[concat(parameters('servers_mysql_ifok7c_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforMySQL/servers', parameters('servers_mysql_ifok7c_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled",
+                "disabledAlerts": [
+                    ""
+                ],
+                "emailAddresses": [
+                    ""
+                ],
+                "emailAccountAdmins": false,
+                "retentionDays": 0
+            }
+        },
+        {
+            "type": "microsoft.insights/autoscalesettings",
+            "apiVersion": "2014-04-01",
+            "name": "[parameters('autoscalesettings_autoscalewad_name')]",
+            "location": "uksouth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('virtualMachineScaleSets_vmss_ifok7c_name'))]"
+            ],
+            "properties": {
+                "profiles": [
+                    {
+                        "name": "Profile1",
+                        "capacity": {
+                            "minimum": "1",
+                            "maximum": "10",
+                            "default": "1"
+                        },
+                        "rules": [
+                            {
+                                "metricTrigger": {
+                                    "metricName": "Percentage CPU",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('virtualMachineScaleSets_vmss_ifok7c_name'))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Average",
+                                    "operator": "GreaterThan",
+                                    "threshold": 60,
+                                    "dimensions": null,
+                                    "dividePerInstance": false
+                                },
+                                "scaleAction": {
+                                    "direction": "Increase",
+                                    "type": "ChangeCount",
+                                    "value": "1",
+                                    "cooldown": "PT10M"
+                                }
+                            },
+                            {
+                                "metricTrigger": {
+                                    "metricName": "Percentage CPU",
+                                    "metricNamespace": "",
+                                    "metricResourceUri": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('virtualMachineScaleSets_vmss_ifok7c_name'))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Average",
+                                    "operator": "LessThan",
+                                    "threshold": 30,
+                                    "dimensions": null,
+                                    "dividePerInstance": false
+                                },
+                                "scaleAction": {
+                                    "direction": "Decrease",
+                                    "type": "ChangeCount",
+                                    "value": "1",
+                                    "cooldown": "PT10M"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "enabled": true,
+                "name": "[parameters('autoscalesettings_autoscalewad_name')]",
+                "targetResourceUri": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('virtualMachineScaleSets_vmss_ifok7c_name'))]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/loadBalancers/backendAddressPools",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('loadBalancers_lb_ifok7c_name'), '/lb-backend-ifok7c')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_lb_ifok7c_name'))]"
+            ],
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('networkSecurityGroups_controller_nsg_ifok7c_name'), '/Allow_http')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_controller_nsg_ifok7c_name'))]"
+            ],
+            "properties": {
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "destinationPortRange": "80",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 1005,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('networkSecurityGroups_controller_nsg_ifok7c_name'), '/Allow_SSH')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_controller_nsg_ifok7c_name'))]"
+            ],
+            "properties": {
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "destinationPortRange": "22",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 1000,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_vnet_ifok7c_name'), '/appgw-subnet-ifok7c')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_ifok7c_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "172.31.6.0/24",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_vnet_ifok7c_name'), '/GatewaySubnet')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_ifok7c_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "172.31.4.0/24",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_vnet_ifok7c_name'), '/redis-subnet-ifok7c')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_ifok7c_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "172.31.3.0/24",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_vnet_ifok7c_name'), '/san-subnet-ifok7c')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_ifok7c_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "172.31.2.0/24",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('virtualNetworks_vnet_ifok7c_name'), '/web-subnet-ifok7c')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_vnet_ifok7c_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "172.31.0.0/24",
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('storageAccounts_absifok7c_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_absifok7c_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('storageAccounts_vmssktd4ntenrrtg6_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_vmssktd4ntenrrtg6_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('storageAccounts_absifok7c_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_absifok7c_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "protocolSettings": {
+                    "smb": {}
+                },
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('storageAccounts_vmssktd4ntenrrtg6_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_vmssktd4ntenrrtg6_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "protocolSettings": {
+                    "smb": {}
+                },
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/queueServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('storageAccounts_absifok7c_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_absifok7c_name'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/queueServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('storageAccounts_vmssktd4ntenrrtg6_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_vmssktd4ntenrrtg6_name'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/tableServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('storageAccounts_absifok7c_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_absifok7c_name'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/tableServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "[concat(parameters('storageAccounts_vmssktd4ntenrrtg6_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_vmssktd4ntenrrtg6_name'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "apiVersion": "2019-07-01",
+            "name": "[parameters('virtualMachineScaleSets_vmss_ifok7c_name')]",
+            "location": "uksouth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_ifok7c_name'), 'web-subnet-ifok7c')]",
+                "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_lb_ifok7c_name'), 'lb-backend-ifok7c')]"
+            ],
+            "tags": {
+                "displayName": "webfarm"
+            },
+            "sku": {
+                "name": "Standard_DS2_v2",
+                "tier": "Standard",
+                "capacity": 1
+            },
+            "properties": {
+                "singlePlacementGroup": true,
+                "upgradePolicy": {
+                    "mode": "Manual"
+                },
+                "virtualMachineProfile": {
+                    "osProfile": {
+                        "computerNamePrefix": "[parameters('virtualMachineScaleSets_vmss_ifok7c_name')]",
+                        "adminUsername": "azureadmin",
+                        "linuxConfiguration": {
+                            "disablePasswordAuthentication": true,
+                            "ssh": {
+                                "publicKeys": [
+                                    {
+                                        "path": "/home/azureadmin/.ssh/authorized_keys",
+                                        "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCjkAQEJAdiZOz63Od69NMJPa24JKHkZiBhv1P7xVOtItBoTQY09b8Io9gknYey5QkR8hRpzS8TXADKOigC1LFNCKsIxbx4BCYsGSLykJjLZhC/NFtOXGl2UxEhSc+GzKhmAcbLP3h2VRfGVZI+HMkvuiqVQAJyoUoYRPgSRI8Berlexc34ygTo5M7HHhs9p71vTP62KzFq6k6aA8KyR8QAzyFRg19/ohUPKIOBgz+ptvMaEpvpHVktbpxknO7Ar1I34ap2AZC2nDAme3rUNicBEKBHGLGvVxgvLkKzYdSKlN35wlvDL8FYW/fI7ilHEI/IqpYDqjrhdOyyTXlGWIGz morgan@cc-624286f2-5fc645bc48-c2jsv"
+                                    }
+                                ]
+                            },
+                            "provisionVMAgent": true
+                        },
+                        "secrets": []
+                    },
+                    "storageProfile": {
+                        "osDisk": {
+                            "createOption": "FromImage",
+                            "caching": "ReadOnly",
+                            "managedDisk": {
+                                "storageAccountType": "Standard_LRS"
+                            },
+                            "diskSizeGB": 30
+                        },
+                        "imageReference": {
+                            "publisher": "Canonical",
+                            "offer": "UbuntuServer",
+                            "sku": "16.04-LTS",
+                            "version": "latest"
+                        }
+                    },
+                    "networkProfile": {
+                        "networkInterfaceConfigurations": [
+                            {
+                                "name": "vmssnic",
+                                "properties": {
+                                    "primary": true,
+                                    "enableAcceleratedNetworking": true,
+                                    "dnsSettings": {
+                                        "dnsServers": []
+                                    },
+                                    "enableIPForwarding": false,
+                                    "ipConfigurations": [
+                                        {
+                                            "name": "ipcfg_lb",
+                                            "properties": {
+                                                "subnet": {
+                                                    "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_ifok7c_name'), 'web-subnet-ifok7c')]"
+                                                },
+                                                "privateIPAddressVersion": "IPv4",
+                                                "loadBalancerBackendAddressPools": [
+                                                    {
+                                                        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_lb_ifok7c_name'), 'lb-backend-ifok7c')]"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "extensionProfile": {
+                        "extensions": [
+                            {
+                                "name": "setup_lamp",
+                                "properties": {
+                                    "autoUpgradeMinorVersion": true,
+                                    "publisher": "Microsoft.Azure.Extensions",
+                                    "type": "CustomScript",
+                                    "typeHandlerVersion": "2.0",
+                                    "settings": {
+                                        "fileUris": [
+                                            "https://raw.githubusercontent.com/Azure/LAMP/master/scripts/setup_webserver.sh",
+                                            "https://raw.githubusercontent.com/Azure/LAMP/master/scripts/helper_functions.sh"
+                                        ]
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                "overprovision": true,
+                "doNotRunExtensionsOnOverprovisionedVMs": false
+            }
+        },
+        {
+            "type": "Microsoft.Network/loadBalancers",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('loadBalancers_lb_ifok7c_name')]",
+            "location": "uksouth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_lb_pubip_ifok7c_name'))]",
+                "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_lb_ifok7c_name'), 'lb-backend-ifok7c')]"
+            ],
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "frontendIPConfigurations": [
+                    {
+                        "name": "lb-frontend-ifok7c",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_lb_pubip_ifok7c_name'))]"
+                            },
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "lb-backend-ifok7c",
+                        "properties": {}
+                    }
+                ],
+                "loadBalancingRules": [
+                    {
+                        "name": "Http",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_lb_ifok7c_name')), '/frontendIPConfigurations/lb-frontend-ifok7c')]"
+                            },
+                            "frontendPort": 80,
+                            "backendPort": 80,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 5,
+                            "protocol": "Tcp",
+                            "enableTcpReset": false,
+                            "loadDistribution": "Default",
+                            "backendAddressPool": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_lb_ifok7c_name'), 'lb-backend-ifok7c')]"
+                            },
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_lb_ifok7c_name')), '/probes/lb-probe-http-ifok7c')]"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Https",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_lb_ifok7c_name')), '/frontendIPConfigurations/lb-frontend-ifok7c')]"
+                            },
+                            "frontendPort": 443,
+                            "backendPort": 443,
+                            "enableFloatingIP": false,
+                            "idleTimeoutInMinutes": 5,
+                            "protocol": "Tcp",
+                            "enableTcpReset": false,
+                            "loadDistribution": "Default",
+                            "backendAddressPool": {
+                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_lb_ifok7c_name'), 'lb-backend-ifok7c')]"
+                            },
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancers_lb_ifok7c_name')), '/probes/lb-probe-https-ifok7c')]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "lb-probe-http-ifok7c",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 80,
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 3
+                        }
+                    },
+                    {
+                        "name": "lb-probe-https-ifok7c",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "port": 443,
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 3
+                        }
+                    }
+                ],
+                "inboundNatRules": [],
+                "inboundNatPools": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworkGateways",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('virtualNetworkGateways_vnet_gateway_ifok7c_name')]",
+            "location": "uksouth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_vnet_gw_ip_ifok7c_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_ifok7c_name'), 'GatewaySubnet')]"
+            ],
+            "properties": {
+                "enablePrivateIpAddress": false,
+                "ipConfigurations": [
+                    {
+                        "name": "vnet-Gateway-Config",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_vnet_gw_ip_ifok7c_name'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_ifok7c_name'), 'GatewaySubnet')]"
+                            }
+                        }
+                    }
+                ],
+                "sku": {
+                    "name": "VpnGw1",
+                    "tier": "VpnGw1"
+                },
+                "gatewayType": "Vpn",
+                "vpnType": "RouteBased",
+                "enableBgp": false,
+                "activeActive": false,
+                "bgpSettings": {
+                    "asn": 65515,
+                    "bgpPeeringAddress": "172.31.4.254",
+                    "peerWeight": 0,
+                    "bgpPeeringAddresses": [
+                        {
+                            "ipconfigurationId": "[concat(resourceId('Microsoft.Network/virtualNetworkGateways', parameters('virtualNetworkGateways_vnet_gateway_ifok7c_name')), '/ipConfigurations/vnet-Gateway-Config')]",
+                            "customBgpIpAddresses": []
+                        }
+                    ]
+                },
+                "vpnGatewayGeneration": "Generation1"
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachineScaleSets/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[concat(parameters('virtualMachineScaleSets_vmss_ifok7c_name'), '/0')]",
+            "location": "uksouth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('virtualMachineScaleSets_vmss_ifok7c_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_ifok7c_name'), 'web-subnet-ifok7c')]",
+                "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_lb_ifok7c_name'), 'lb-backend-ifok7c')]"
+            ],
+            "tags": {
+                "displayName": "webfarm"
+            },
+            "sku": {
+                "name": "Standard_DS2_v2",
+                "tier": "Standard"
+            },
+            "properties": {
+                "networkProfileConfiguration": {
+                    "networkInterfaceConfigurations": [
+                        {
+                            "name": "vmssnic",
+                            "properties": {
+                                "primary": true,
+                                "enableAcceleratedNetworking": true,
+                                "dnsSettings": {
+                                    "dnsServers": []
+                                },
+                                "enableIPForwarding": false,
+                                "ipConfigurations": [
+                                    {
+                                        "name": "ipcfg_lb",
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_ifok7c_name'), 'web-subnet-ifok7c')]"
+                                            },
+                                            "privateIPAddressVersion": "IPv4",
+                                            "loadBalancerBackendAddressPools": [
+                                                {
+                                                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', parameters('loadBalancers_lb_ifok7c_name'), 'lb-backend-ifok7c')]"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "hardwareProfile": {},
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "16.04-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "vmss-ifok7c_vmss-ifok7c_0_OsDisk_1_6673ca5a816444b69053b585db192fb3",
+                        "createOption": "FromImage",
+                        "caching": "ReadOnly",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS",
+                            "id": "[parameters('disks_vmss_ifok7c_vmss_ifok7c_0_OsDisk_1_6673ca5a816444b69053b585db192fb3_externalid')]"
+                        },
+                        "diskSizeGB": 30
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "vmss-ifok7c000000",
+                    "adminUsername": "azureadmin",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": true,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "/home/azureadmin/.ssh/authorized_keys",
+                                    "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCjkAQEJAdiZOz63Od69NMJPa24JKHkZiBhv1P7xVOtItBoTQY09b8Io9gknYey5QkR8hRpzS8TXADKOigC1LFNCKsIxbx4BCYsGSLykJjLZhC/NFtOXGl2UxEhSc+GzKhmAcbLP3h2VRfGVZI+HMkvuiqVQAJyoUoYRPgSRI8Berlexc34ygTo5M7HHhs9p71vTP62KzFq6k6aA8KyR8QAzyFRg19/ohUPKIOBgz+ptvMaEpvpHVktbpxknO7Ar1I34ap2AZC2nDAme3rUNicBEKBHGLGvVxgvLkKzYdSKlN35wlvDL8FYW/fI7ilHEI/IqpYDqjrhdOyyTXlGWIGz morgan@cc-624286f2-5fc645bc48-c2jsv"
+                                }
+                            ]
+                        },
+                        "provisionVMAgent": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[concat(resourceId('Microsoft.Compute/virtualMachineScaleSets/virtualMachines', parameters('virtualMachineScaleSets_vmss_ifok7c_name'), '0'), '/networkInterfaces/vmssnic')]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-05-01",
+            "name": "[parameters('networkInterfaces_controller_vm_nic_ifok7c_name')]",
+            "location": "uksouth",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_controller_pubip_ifok7c_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_ifok7c_name'), 'web-subnet-ifok7c')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_controller_nsg_ifok7c_name'))]"
+            ],
+            "tags": {
+                "displayName": "ctlrNic"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipcfgctlr",
+                        "properties": {
+                            "privateIPAddress": "172.31.0.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_controller_pubip_ifok7c_name'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_vnet_ifok7c_name'), 'web-subnet-ifok7c')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_controller_nsg_ifok7c_name'))]"
+                }
+            }
+        }
+    ]
+}
